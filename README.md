@@ -58,9 +58,9 @@ The project includes automated tests via CTest:
 cd build && ctest --output-on-failure
 ```
 ### Technical Implementation
+
 #### RAII Architecture
 We manage FFmpeg resources using custom RAII wrappers to ensure zero memory leaks even during early interrupts:
-
 ```C++
 struct Packet {
     AVPacket* pkt;
@@ -70,9 +70,20 @@ struct Packet {
 };
 ```
 
-```Markdown
+#### Refined Logic for Local Files
+A significant fix was implemented regarding how the tool calculates the duration used for FPS and Bitrate.
+
+**The Problem**: Initially, using real-world elapsed time (chrono::steady_clock) worked for live RTSP streams but failed for local files. Since local files are read as fast as the disk allows, a 30-second video might be processed in 1 second, resulting in massive, incorrect FPS and Bitrate spikes.
+
+**The Solution**: The tool now calculates duration based on the Presentation Timestamps (PTS) of the video packets. This "Media Time" approach ensures that whether a stream is live or a local file, the calculated duration matches the actual video content.
+
+```C++
+// Correct way to calculate duration for all sources:
+double media_duration = last_pts_sec - first_pts_sec;
+fps_meas = packets / media_duration;
+```
+
 ### Final Checklist for you:
 1.  **Executable Name**: In your `CMakeLists.txt`, make sure the `add_executable` target is named `rtsp-lab` (with a hyphen), as that's what the requirement uses.
 2.  **Location**: Always run that `cmake` command from the folder where `CMakeLists.txt` lives.
 3.  **Clean Start**: If you have an old `build` folder, delete it (`rm -rf build`) before run
-```
