@@ -139,6 +139,7 @@ int run_probe(const std::string& input,
 
             if (pkt.pkt->flags & AV_PKT_FLAG_KEY) {
                 key_times.push_back(pts_sec);
+                //std::cerr << "[DEBUG] Keyframe found at PTS: " << pts_sec << "s. Total keyframes: " << key_times.size() << std::endl;
             }
         }
 
