@@ -79,6 +79,14 @@ int run_probe(const std::string& input,
 
     const char* codec = avcodec_get_name(cp->codec_id);
 
+    const char* profile_name = avcodec_profile_name(cp->codec_id, cp->profile);
+    
+    // Format Level (e.g., 41 -> 4.1)
+    std::string level_str = (cp->level != FF_LEVEL_UNKNOWN) 
+                            ? std::to_string(cp->level / 10) + "." + std::to_string(cp->level % 10)
+                            : "Unknown";
+
+
     double fps_adv = av_q2d(vs->avg_frame_rate);
     int bitrate_adv = fmt.ctx->bit_rate / 1000;
 
@@ -139,6 +147,7 @@ int run_probe(const std::string& input,
 
             if (pkt.pkt->flags & AV_PKT_FLAG_KEY) {
                 key_times.push_back(pts_sec);
+                //std::cerr << "[DEBUG] Keyframe found at PTS: " << pts_sec << "s. Total keyframes: " << key_times.size() << std::endl;
             }
         }
 
@@ -174,11 +183,10 @@ int run_probe(const std::string& input,
     // --- output ---
     if (json) {
         std::cout << "{\n";
-        std::cout << "\"codec\": \"" << codec << "\",\n";
+        std::cout << "\"codec\": \"" << codec << "\", \"profile\": \"" << (profile_name ? profile_name : "Unknown") << "\", \"level\": \"" << level_str << "\",\n";
         std::cout << "\"resolution\": {\"width\": " << width
                   << ", \"height\": " << height << "},\n";
-        std::cout << "\"fps_advertised\": " << fps_adv << ",\n";
-        std::cout << "\"fps_measured\": " << fps_meas << ",\n";
+        std::cout << "\"fps_advertised\": " << fps_adv << ", \"fps_measured\": " << fps_meas << ",\n";
         std::cout << "\"bitrate_advertised_kbps\": " << bitrate_adv << ",\n";
         std::cout << "\"bitrate_measured_kbps\": " << bitrate_meas << ",\n";
         std::cout << "\"keyframe_interval_s\": " << key_interval << ",\n";
@@ -189,15 +197,15 @@ int run_probe(const std::string& input,
         //std::cout << "\n";
         std::cout << "=== rtsp-lab probe ===\n";
         std::cout << "Input: " << input << "\n";
-        std::cout << "Codec: " << codec << "\n";
+        std::cout << "Codec:       " << codec << " (" << (profile_name ? profile_name : "Unknown") << ", Level " << level_str << ")\n";
         std::cout << "Resolution: " << width << "x" << height << "\n";
-        std::cout << "FPS (adv): " << fps_adv << "\n";
-        std::cout << "FPS (meas): " << fps_meas << "\n";
-        std::cout << "Bitrate (adv): " << bitrate_adv << " kbps\n";
-        std::cout << "Bitrate (meas): " << bitrate_meas << " kbps\n";
+        std::cout << "FPS (advertised): " << fps_adv << "\n";
+        std::cout << "FPS (measured): " << fps_meas << "\n";
+        std::cout << "Bitrate (adv.): " << bitrate_adv << " kbps\n";
+        std::cout << "Bitrate (meas.): " << bitrate_meas << " kbps\n";
         std::cout << "Keyframe interval: " << key_interval << " s\n";
         std::cout << "Time to first frame: " << ttf_ms << " ms\n";
-        std::cout << "Packets: " << packets << "\n";
+        std::cout << "Packets received: " << packets << "\n";
     }
 
     return 0;
