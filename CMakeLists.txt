@@ -38,3 +38,6 @@ enable_testing()
 add_executable(unit_tests tests/unit_tests.cpp src/probe_helpers.cpp)
 target_link_libraries(unit_tests GTest::gtest_main)
 add_test(NAME AllUnitTests COMMAND unit_tests)
+# Add the Integration Test script to CTest
+add_test(NAME IntegrationTests 
+         COMMAND bash ${CMAKE_SOURCE_DIR}/tests/integration_test.sh)
