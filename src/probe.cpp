@@ -167,14 +167,7 @@ int run_probe(const std::string& input,
         bitrate_meas = (total_bytes * 8.0 / 1000.0) / media_duration;
     }
     
-    double key_interval = 0.0;
-    if (key_times.size() > 1) {
-        double sum = 0;
-        for (size_t i = 1; i < key_times.size(); i++) {
-            sum += key_times[i] - key_times[i - 1];
-        }
-        key_interval = sum / (key_times.size() - 1);
-    }
+    double key_interval = calculate_key_interval(key_times);
 
     double ttf_ms =
         std::chrono::duration<double, std::milli>(
