@@ -21,6 +21,14 @@ cmake -S . -B build && cmake --build build -j
 ```
 This will create a build directory and compile the rtsp-lab executable inside it.
 
+## Start the RTSP server
+
+```bash
+docker run --rm -d --network=host --name mtx bluenviron/mediamtx:latest
+```
+
+
+
 ## Setting up a Test Stream
 To test RTSP functionality locally:
 
@@ -29,7 +37,7 @@ To test RTSP functionality locally:
 Publish a stream:
 
 ```Bash
-ffmpeg -re -i sample.mp4 -c copy -f rtsp rtsp://localhost:8554/test
+ffmpeg -re -stream_loop -1 -i sample.mp4 -c copy -f rtsp rtsp://127.0.0.1:8554/test
 ```
 
 ### Usage
