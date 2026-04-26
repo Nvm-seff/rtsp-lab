@@ -15,6 +15,7 @@ include_directories(include ${AV_INCLUDE_DIRS})
 add_executable(rtsp-lab 
     src/main.cpp 
     src/probe.cpp 
+    src/probe_helpers.cpp
     src/ffmpeg_raii.cpp
 )
 
@@ -23,3 +24,17 @@ target_link_libraries(rtsp-lab
     ${AV_LIBRARIES} 
     pthread
 )
+
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/heads/main.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+# Define the test executable
+enable_testing()
+add_executable(unit_tests tests/unit_tests.cpp src/probe_helpers.cpp)
+target_link_libraries(unit_tests GTest::gtest_main)
+add_test(NAME AllUnitTests COMMAND unit_tests)
